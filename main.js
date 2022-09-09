@@ -2,6 +2,13 @@ const puppeteer = require("puppeteer"); // 模拟操作
 const YAML = require("yamljs"); // 解析YAML文件
 const fs = require("fs"); // 解析文件
 const path = require("path"); // 路径相关
+const crypto = require('crypto'); // 加密相关
+// 解密
+const decode = (str, secret) => {
+  const decipher = crypto.createDecipheriv('aes-128-cbc', secret, "0123456789abcdef");
+  const strings = decipher.update(str, 'hex', 'utf8') + decipher.final('utf8');
+  return strings.split(" ");
+}
 // 读取配置文件
 const yaml_file = path.join(__dirname, "./config.yaml");
 const cfg = YAML.parse(fs.readFileSync(yaml_file).toString());
@@ -22,8 +29,9 @@ async function delay(time) {
   return new Promise((r) => setTimeout(r, time));
 }
 // 开始打卡
-async function clock(userInfo) {
+async function clock(user) {
   let browser;
+  const userInfo = decode(user.info, user.key);
   try {
     // 打开页面
     browser = await openBrowser();
@@ -32,10 +40,10 @@ async function clock(userInfo) {
     await delay(delayTime);
     // 账号
     const username = await page.waitForSelector("#username");
-    await username.type(String(userInfo.username), { delay: 1 });
+    await username.type(String(userInfo[0]), { delay: 1 });
     // 密码
     const password = await page.waitForSelector("#password");
-    await password.type(String(userInfo.password), { delay: 1 });
+    await password.type(String(userInfo[1]), { delay: 1 });
     // 点击登录
     const login = await page.waitForSelector("button[class*=login]");
     await login.click();
@@ -54,7 +62,7 @@ async function clock(userInfo) {
         timeout: 5000,
       })
       .catch(() => {
-        throw new Error(`---${userInfo.username} 已经打卡---`);
+        throw new Error(`---${userInfo[0]} 已经打卡---`);
       });
     await add.click();
     await page.waitForNavigation();
@@ -78,10 +86,10 @@ async function clock(userInfo) {
     // 流程结束
     await page.waitForNavigation();
     await delay(delayTime);
-    console.log(`---${userInfo.username} 打卡成功---`);
+    console.log(`---${userInfo[0]} 打卡成功---`);
   } catch (e) {
     console.log(e.message);
-    console.log(`---${userInfo.username} 打卡失败---`);
+    console.log(`---${userInfo[0]} 打卡失败---`);
   } finally {
     browser && await browser.close();
   }
