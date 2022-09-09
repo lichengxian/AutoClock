@@ -1,0 +1,11 @@
+setting:
+  delayTime: 2000
+users:
+  - 
+    # 用户1
+    username: 账号
+    password: 密码
+  -
+    # 用户2
+    username: 账号
+    password: 密码
