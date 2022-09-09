@@ -3,9 +3,9 @@ setting:
 users:
   - 
     # 用户1
-    username: 账号
-    password: 密码
+    info: 用户信息
+    key: 秘钥
   -
     # 用户2
-    username: 账号
-    password: 密码
+    info: 用户信息
+    key: 秘钥
