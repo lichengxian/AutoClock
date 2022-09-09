@@ -5,7 +5,9 @@ users:
     # 用户1
     info: 用户信息
     key: 秘钥
+    lesson: 青年大学习Cookie
   -
     # 用户2
     info: 用户信息
     key: 秘钥
+    lesson: 青年大学习Cookie
