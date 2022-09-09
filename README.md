@@ -1,6 +1,6 @@
 ﻿# 安装使用
 ## win10系统
-1. 下载安装(Node)[https://nodejs.org/en/]，选择LTS版
+1. 下载安装[Node](https://nodejs.org/en/)，选择LTS版
 2. 安装cnpm，并设置为默认，终端输入
 ```
 npm install -g cnpm --registry=https://registry.npm.taobao.org
