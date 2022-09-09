@@ -7,5 +7,5 @@ npm install -g cnpm --registry=https://registry.npm.taobao.org
 cnpm install
 ```
 3. 右击此电脑 -> 管理 -> 任务计划程序 -> 操作 -> 创建基本任务 -> 名称和描述自己随便写 -> 下一步 -> 每天 -> 下一步 -> 设置执行脚本时间 -> 下一步 -> 启动程序 -> 下一步 -> 添加AutoClock.bat文件 -> 下一步 -> 完成
-4. 在`config.yaml`中配置健康打卡账号信息
+4. 在`config.yaml`中配置健康打卡账号信息和青年大学习Cookie
 ## Ubuntu系统

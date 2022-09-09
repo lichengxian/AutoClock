@@ -2,17 +2,22 @@ const puppeteer = require("puppeteer"); // 模拟操作
 const YAML = require("yamljs"); // 解析YAML文件
 const fs = require("fs"); // 解析文件
 const path = require("path"); // 路径相关
-const crypto = require('crypto'); // 加密相关
-// 解密
-const decode = (str, secret) => {
-  const decipher = crypto.createDecipheriv('aes-128-cbc', secret, "0123456789abcdef");
-  const strings = decipher.update(str, 'hex', 'utf8') + decipher.final('utf8');
-  return strings.split(" ");
-}
+const crypto = require("crypto"); // 加密相关
+const autoLearn = require("./youthLesson");
 // 读取配置文件
 const yaml_file = path.join(__dirname, "./config.yaml");
 const cfg = YAML.parse(fs.readFileSync(yaml_file).toString());
 const delayTime = cfg.setting.delayTime;
+// 解密
+const decode = (str, secret) => {
+  const decipher = crypto.createDecipheriv(
+    "aes-128-cbc",
+    secret,
+    "0123456789abcdef"
+  );
+  const strings = decipher.update(str, "hex", "utf8") + decipher.final("utf8");
+  return strings.split(" ");
+};
 // 打开浏览器
 async function openBrowser() {
   const browser = await puppeteer.launch({
@@ -91,13 +96,14 @@ async function clock(user) {
     console.log(e.message);
     console.log(`---${userInfo[0]} 打卡失败---`);
   } finally {
-    browser && await browser.close();
+    browser && (await browser.close());
   }
 }
-
+// 主函数
 const main = async () => {
   for (const user of cfg.users) {
     await clock(user);
+    await autoLearn(user.lesson);
   }
 };
 main();
