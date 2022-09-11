@@ -1,9 +1,10 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
+const { log } = require("./utils");
 
 const autoLearn = async (laravel_session) => {
   // 抓包获取cookie
-  // const laravel_session = "Czp0vnwKLWgyI8LYCFYmmLJUsbXrFMkr8iPwLbyR";
+  // const laravel_session = "";
   if (!laravel_session) return;
   // 青年大学习课程接口
   let url = "https://service.jiangsugqt.org/youth/lesson";
@@ -25,10 +26,10 @@ const autoLearn = async (laravel_session) => {
   // 解析HTML
   const $ = cheerio.load(html);
   // 获取用户信息
-  console.log(`--- 用户信息 ---`);
+  log(`--- 青年大学习用户信息 ---`);
   const userInfo = $(".confirm-user-info p");
   for (const item of userInfo) {
-    console.log(item.lastChild.data);
+    log(item.lastChild.data);
   }
   // 青年大学习打卡接口
   url = "https://service.jiangsugqt.org/youth/lesson/confirm";
@@ -40,10 +41,10 @@ const autoLearn = async (laravel_session) => {
   // 发送请求
   response = await axios({ method: "post", url, data, headers });
   if (response.data.status === 1 && response.data.message === "操作成功") {
-    console.log(`--- 学习成功 ---`);
+    log(`--- 青年大学习成功 ---`);
     return;
   }
-  console.log(`--- 学习失败 ---`);
+  log(`--- 青年大学习失败 ---`);
 };
 
 module.exports = autoLearn;

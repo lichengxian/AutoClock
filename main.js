@@ -2,22 +2,12 @@ const puppeteer = require("puppeteer"); // 模拟操作
 const YAML = require("yamljs"); // 解析YAML文件
 const fs = require("fs"); // 解析文件
 const path = require("path"); // 路径相关
-const crypto = require("crypto"); // 加密相关
 const autoLearn = require("./youthLesson");
+const { log, decode, delay, log_path } = require("./utils");
 // 读取配置文件
 const yaml_file = path.join(__dirname, "./config.yaml");
 const cfg = YAML.parse(fs.readFileSync(yaml_file).toString());
 const delayTime = cfg.setting.delayTime;
-// 解密
-const decode = (str, secret) => {
-  const decipher = crypto.createDecipheriv(
-    "aes-128-cbc",
-    secret,
-    "0123456789abcdef"
-  );
-  const strings = decipher.update(str, "hex", "utf8") + decipher.final("utf8");
-  return strings.split(" ");
-};
 // 打开浏览器
 async function openBrowser() {
   const browser = await puppeteer.launch({
@@ -29,11 +19,7 @@ async function openBrowser() {
   });
   return browser;
 }
-// 延迟一定时间
-async function delay(time) {
-  return new Promise((r) => setTimeout(r, time));
-}
-// 开始打卡
+// 开始健康打卡
 async function clock(user) {
   let browser;
   const userInfo = decode(user.info, user.key);
@@ -41,7 +27,14 @@ async function clock(user) {
     // 打开页面
     browser = await openBrowser();
     const page = await browser.newPage();
-    await page.goto("https://seicwxbz.seu.edu.cn/self-service/");
+    try {
+      await page.goto(
+        "http://ehall.seu.edu.cn/qljfwapp2/sys/ lwReportEpidemicSeu/*default/index.do#/add"
+      );
+    } catch (e) {
+      await page.reload();
+      log(`--- 登录页面重新加载 ---`);
+    }
     await delay(delayTime);
     // 账号
     const username = await page.waitForSelector("#username");
@@ -54,28 +47,15 @@ async function clock(user) {
     await login.click();
     await page.waitForNavigation();
     await delay(delayTime);
-    // 点击健康申报
-    const report = await page.waitForSelector("#right-inner > div:first-child");
-    await report.click();
-    await page.waitForNavigation();
-    await delay(delayTime);
-    // 等待列表加载后
-    await page.waitForSelector(".mint-loadmore > .mint-loadmore-content");
-    // 点击新增
-    const add = await page
-      .waitForSelector(".pjcse52gj > button[class*=bottom155]", {
-        timeout: 5000,
-      })
-      .catch(() => {
-        throw new Error(`---${userInfo[0]} 已经打卡---`);
-      });
-    await add.click();
-    await page.waitForNavigation();
-    await delay(delayTime);
     // 填入体温
     const temperature = await page.waitForSelector(
       "input[placeholder*=请输入当天晨检体温]"
     );
+    const text = await page.$eval(
+      "input[placeholder*=请输入当天晨检体温]",
+      (el) => el.value
+    );
+    if (text) throw new Error(`--- ${userInfo[0]} 已经打卡 ---`);
     temperature.type(String(36 + Number(Math.random().toFixed(1))));
     // 点击提交
     const submit = await page.waitForSelector(
@@ -91,16 +71,17 @@ async function clock(user) {
     // 流程结束
     await page.waitForNavigation();
     await delay(delayTime);
-    console.log(`---${userInfo[0]} 打卡成功---`);
+    log(`--- ${userInfo[0]} 打卡成功 ---`);
   } catch (e) {
-    console.log(e.message);
-    console.log(`---${userInfo[0]} 打卡失败---`);
+    log(e.message);
+    log(`--- ${userInfo[0]} 打卡失败 ---`);
   } finally {
     browser && (await browser.close());
   }
 }
 // 主函数
 const main = async () => {
+  if (fs.existsSync(log_path)) fs.unlinkSync(log_path); // 重新生成日志
   for (const user of cfg.users) {
     await clock(user);
     await autoLearn(user.lesson);
