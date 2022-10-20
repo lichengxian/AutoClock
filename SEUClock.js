@@ -52,6 +52,7 @@ async function autoClock(user, cfg) {
     );
     if (text) throw new Error(`--- ${userInfo[0]} 已经打卡 ---`);
     temperature.type(String(36 + Number(Math.random().toFixed(1))));
+    await delay(delayTime);
     // 点击提交
     const submit = await page.waitForSelector(
       ".OPjctwlgzsl > button[class*=mint-button--large]"
