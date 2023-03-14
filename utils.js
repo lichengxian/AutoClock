@@ -14,7 +14,7 @@ const log = (string) => {
   if (!fs.existsSync(log_path)) fs.writeFileSync(log_path, str);
   else {
     const context = fs.readFileSync(log_path);
-    fs.writeFileSync(log_path, context + str);
+    fs.writeFileSync(log_path, str + context);
   }
 };
 

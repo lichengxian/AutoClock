@@ -55,7 +55,7 @@ async function autoClock(user, cfg) {
     await delay(delayTime);
     // 点击提交
     const submit = await page.waitForSelector(
-      ".OPjctwlgzsl > button[class*=mint-button--large]"
+      "div[style*=padding].OPjctwlgzsl > button[class*=mint-button--large]"
     );
     submit.click();
     // 点击确认
